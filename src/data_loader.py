@@ -6,8 +6,7 @@ def load_spotify_data(path=None):
     if path is None:
         # Works both locally and on Streamlit Cloud
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        path = os.path.join(base_dir, "data", "spotify_tracks.csv")
-
+	path = os.path.join(base_dir, "Data", "tracks.csv")
     df = pd.read_csv(path)
 
     # Drop duplicates and nulls
