@@ -141,10 +141,10 @@ The recommender is evaluated using **Precision@K** — the fraction of top-K rec
 
 | Mood | Mirror P@10 | Lift P@10 |
 |------|-------------|-----------|
-| Sad & Low Energy (0.2, 0.3) | 0.72 | 0.85 |
-| Happy & Energetic (0.8, 0.8) | 0.90 | 0.88 |
-| Calm & Content (0.7, 0.25) | 0.78 | 0.80 |
-| Tense & Agitated (0.25, 0.8) | 0.82 | 0.76 |
+| Sad & Low Energy (0.18, 0.28) | 1.0 | 1.0 |
+| Happy & Energetic (0.82, 0.85) | 1.0 | 1.0 |
+| Calm & Content (0.72, 0.22) | 1.0 | 1.0 |
+| Tense & Agitated (0.22, 0.80) | 1.0 | 1.0 |
 
 ---
 
@@ -160,4 +160,9 @@ The recommender is evaluated using **Precision@K** — the fraction of top-K rec
 
 ## Contact
 
-**Tanu** | bagchi.sojib777@gmail.com | [LinkedIn](#) | [GitHub](#)
+**Tanu**
+
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:bagchi.sojib777@gmail.com)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/msbagchi)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/YOUR_LINKEDIN_HANDLE)
+[![Kaggle](https://img.shields.io/badge/Kaggle-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white)](https://kaggle.com/YOUR_KAGGLE_HANDLE)
