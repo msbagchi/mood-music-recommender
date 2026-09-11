@@ -9,43 +9,61 @@ from config import (
 class MoodRecommender:
     def __init__(self, df):
         self.df = df.copy()
+        self._language_warning = None
 
-    def recommend(self, valence, arousal, mode="mirror", top_n=DEFAULT_TOP_N):
+    def recommend(self, valence, arousal, mode="mirror", top_n=DEFAULT_TOP_N, language=None):
         """Recommend tracks based on target mood.
 
         Args:
-            valence: Target valence (0–1).
-            arousal: Target arousal/energy (0–1).
-            mode: 'mirror' matches current mood; 'lift' shifts target toward
-                  higher valence and energy to improve the listener's mood.
-            top_n: Number of tracks to return.
-
-        Returns:
-            DataFrame with ranked recommendations.
+            valence:  Target valence (0–1).
+            arousal:  Target arousal/energy (0–1).
+            mode:     'mirror' matches current mood; 'lift' shifts target toward
+                      higher valence and energy.
+            top_n:    Number of tracks to return.
+            language: Optional language filter ('Hindi', 'Bengali', 'English', etc.).
+                      Falls back to all languages if fewer than top_n tracks are found.
         """
+        self._language_warning = None
         df = self.df.copy()
+
+        if language and language != "All" and "language" in df.columns:
+            filtered = df[df["language"] == language]
+            if len(filtered) >= top_n:
+                df = filtered
+            else:
+                self._language_warning = (
+                    f"Not enough '{language}' songs in the dataset for this mood. "
+                    f"Showing results from all languages."
+                )
 
         if mode == "lift":
             valence = min(1.0, valence + LIFT_VALENCE_DELTA)
             arousal = min(1.0, arousal + LIFT_AROUSAL_DELTA)
 
-        df["distance"] = np.sqrt(
-            (df["valence"] - valence) ** 2 +
-            (df["energy"] - arousal) ** 2
+        df = df.assign(
+            distance=np.sqrt(
+                (df["valence"] - valence) ** 2 +
+                (df["energy"] - arousal) ** 2
+            )
         )
-
-        df["popularity_score"] = df["popularity"] / 100.0
-        df["final_score"] = df["distance"] - (POPULARITY_BOOST_WEIGHT * df["popularity_score"])
+        df = df.assign(
+            popularity_score=df["popularity"] / 100.0
+        )
+        df = df.assign(
+            final_score=df["distance"] - (POPULARITY_BOOST_WEIGHT * df["popularity_score"])
+        )
 
         results = df.nsmallest(top_n, "final_score")[
             ["track_name", "artists", "valence", "energy",
              "tempo", "danceability", "popularity", "distance"]
         ].reset_index(drop=True)
 
-        results["rank"] = results.index + 1
-        results["valence"] = results["valence"].round(3)
-        results["energy"] = results["energy"].round(3)
-        results["distance"] = results["distance"].round(3)
+        results = results.assign(
+            rank=results.index + 1,
+            valence=results["valence"].round(3),
+            energy=results["energy"].round(3),
+            distance=results["distance"].round(3),
+        )
 
         return results
 
@@ -53,8 +71,7 @@ class MoodRecommender:
                        threshold=PRECISION_THRESHOLD):
         """Fraction of top-K recommendations within threshold distance of target mood."""
         results = self.recommend(valence, arousal, top_n=k)
-        relevant = results[results["distance"] <= threshold]
-        return round(len(relevant) / k, 3)
+        return round((results["distance"] <= threshold).sum() / k, 3)
 
 
 if __name__ == "__main__":
@@ -68,8 +85,8 @@ if __name__ == "__main__":
         ["rank", "track_name", "artists", "valence", "energy"]
     ].to_string())
 
-    print("\n--- Sad & Tired (lift) ---")
-    print(recommender.recommend(0.183, 0.302, mode="lift")[
+    print("\n--- Hindi recommendations ---")
+    print(recommender.recommend(0.5, 0.6, language="Hindi")[
         ["rank", "track_name", "artists", "valence", "energy"]
     ].to_string())
 

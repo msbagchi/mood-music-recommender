@@ -275,12 +275,19 @@ with col_input:
         label_visibility="collapsed"
     )
 
-col_opt1, col_opt2, col_opt3 = st.columns([1, 1, 1])
+col_opt1, col_opt2, col_opt3, col_opt4 = st.columns([1, 1, 1, 1])
 with col_opt1:
     mode = st.radio("Mode", ["🪞 Match my mood", "🚀 Lift my mood"], horizontal=True)
 with col_opt2:
     top_n = st.slider("Number of songs", 5, 20, 10)
 with col_opt3:
+    language = st.selectbox(
+        "Language",
+        ["All", "English", "Hindi", "Bengali",
+         "Spanish", "Japanese", "Korean", "Mandarin",
+         "French", "Portuguese", "Turkish", "Persian", "Malay"]
+    )
+with col_opt4:
     st.markdown("<br>", unsafe_allow_html=True)
     go_btn = st.button("🎧  Discover Songs", use_container_width=True)
 
@@ -382,9 +389,11 @@ if go_btn:
         with st.spinner("🎵 Finding your perfect songs..."):
             songs = recommender.recommend(
                 result['valence'], result['arousal'],
-                mode=recommend_mode, top_n=top_n)
+                mode=recommend_mode, top_n=top_n, language=language)
             precision = recommender.precision_at_k(
                 result['valence'], result['arousal'], k=top_n)
+            if recommender._language_warning:
+                st.info(recommender._language_warning)
 
         st.markdown(
             f'<div class="section-title">🎶 Your Playlist '

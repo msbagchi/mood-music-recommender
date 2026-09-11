@@ -20,6 +20,34 @@ FULL_COLS = RECOMMENDATION_COLS + [
     "mode", "liveness", "speechiness", "time_signature", "track_genre"
 ]
 
+GENRE_LANGUAGE_MAP = {
+    "indian":      "Hindi",
+    "cantopop":    "Mandarin",
+    "mandopop":    "Mandarin",
+    "j-pop":       "Japanese",
+    "j-rock":      "Japanese",
+    "j-dance":     "Japanese",
+    "j-idol":      "Japanese",
+    "anime":       "Japanese",
+    "k-pop":       "Korean",
+    "french":      "French",
+    "german":      "German",
+    "spanish":     "Spanish",
+    "latin":       "Spanish",
+    "latino":      "Spanish",
+    "reggaeton":   "Spanish",
+    "salsa":       "Spanish",
+    "turkish":     "Turkish",
+    "iranian":     "Persian",
+    "malay":       "Malay",
+    "brazil":      "Portuguese",
+    "samba":       "Portuguese",
+    "forro":       "Portuguese",
+    "pagode":      "Portuguese",
+    "sertanejo":   "Portuguese",
+    "mpb":         "Portuguese",
+}
+
 POPULARITY_BOOST_WEIGHT = 0.05
 LIFT_VALENCE_DELTA = 0.25
 LIFT_AROUSAL_DELTA = 0.15
