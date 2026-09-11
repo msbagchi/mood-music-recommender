@@ -9,21 +9,14 @@ from config import (
 class MoodRecommender:
     def __init__(self, df):
         self.df = df.copy()
-        self._language_warning = None
 
     def recommend(self, valence, arousal, mode="mirror", top_n=DEFAULT_TOP_N, language=None):
         """Recommend tracks based on target mood.
 
-        Args:
-            valence:  Target valence (0–1).
-            arousal:  Target arousal/energy (0–1).
-            mode:     'mirror' matches current mood; 'lift' shifts target toward
-                      higher valence and energy.
-            top_n:    Number of tracks to return.
-            language: Optional language filter ('Hindi', 'Bengali', 'English', etc.).
-                      Falls back to all languages if fewer than top_n tracks are found.
+        Returns:
+            (DataFrame of recommendations, warning string or None)
         """
-        self._language_warning = None
+        warning = None
         df = self.df.copy()
 
         if language and language != "All" and "language" in df.columns:
@@ -31,9 +24,9 @@ class MoodRecommender:
             if len(filtered) >= top_n:
                 df = filtered
             else:
-                self._language_warning = (
-                    f"Not enough '{language}' songs in the dataset for this mood. "
-                    f"Showing results from all languages."
+                warning = (
+                    f"Not enough '{language}' songs found for this mood — "
+                    f"showing results from all languages."
                 )
 
         if mode == "lift":
@@ -46,9 +39,7 @@ class MoodRecommender:
                 (df["energy"] - arousal) ** 2
             )
         )
-        df = df.assign(
-            popularity_score=df["popularity"] / 100.0
-        )
+        df = df.assign(popularity_score=df["popularity"] / 100.0)
         df = df.assign(
             final_score=df["distance"] - (POPULARITY_BOOST_WEIGHT * df["popularity_score"])
         )
@@ -65,12 +56,12 @@ class MoodRecommender:
             distance=results["distance"].round(3),
         )
 
-        return results
+        return results, warning
 
     def precision_at_k(self, valence, arousal, k=DEFAULT_TOP_N,
                        threshold=PRECISION_THRESHOLD):
         """Fraction of top-K recommendations within threshold distance of target mood."""
-        results = self.recommend(valence, arousal, top_n=k)
+        results, _ = self.recommend(valence, arousal, top_n=k)
         return round((results["distance"] <= threshold).sum() / k, 3)
 
 
@@ -80,14 +71,11 @@ if __name__ == "__main__":
     df = load_spotify_data()
     recommender = MoodRecommender(df)
 
-    print("\n--- Sad & Tired (mirror) ---")
-    print(recommender.recommend(0.183, 0.302, mode="mirror")[
-        ["rank", "track_name", "artists", "valence", "energy"]
-    ].to_string())
+    results, warning = recommender.recommend(0.183, 0.302, mode="mirror")
+    print(results[["rank", "track_name", "artists", "valence", "energy"]].to_string())
 
-    print("\n--- Hindi recommendations ---")
-    print(recommender.recommend(0.5, 0.6, language="Hindi")[
-        ["rank", "track_name", "artists", "valence", "energy"]
-    ].to_string())
+    results, warning = recommender.recommend(0.5, 0.6, language="Hindi")
+    print(results[["rank", "track_name", "artists"]].to_string())
+    print(f"Warning: {warning}")
 
     print(f"\nPrecision@10: {recommender.precision_at_k(0.183, 0.302)}")

@@ -387,13 +387,13 @@ if go_btn:
         st.plotly_chart(fig, use_container_width=True)
 
         with st.spinner("🎵 Finding your perfect songs..."):
-            songs = recommender.recommend(
+            songs, lang_warning = recommender.recommend(
                 result['valence'], result['arousal'],
                 mode=recommend_mode, top_n=top_n, language=language)
             precision = recommender.precision_at_k(
                 result['valence'], result['arousal'], k=top_n)
-            if recommender._language_warning:
-                st.info(recommender._language_warning)
+            if lang_warning:
+                st.info(lang_warning)
 
         st.markdown(
             f'<div class="section-title">🎶 Your Playlist '
